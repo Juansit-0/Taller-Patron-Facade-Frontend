@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import Booking from './Booking.jsx'
 import Manage from './Manage.jsx'
+import Vicky from './Vicky.jsx'
 
 export default function App() {
   const [view, setView] = useState('booking')
   const [reservation, setReservation] = useState(null)
   const [justBooked, setJustBooked] = useState(false)
   const [toast, setToast] = useState(null)
+  const [vickyOpen, setVickyOpen] = useState(false)
 
   const notify = useCallback((message, tone = 'error') => setToast({ message, tone, key: Date.now() }), [])
 
@@ -24,6 +26,19 @@ export default function App() {
   const handleReserved = (created) => {
     setReservation(created)
     setJustBooked(true)
+    goTo('manage')
+  }
+
+  const bookManually = () => {
+    setVickyOpen(false)
+    goTo('booking')
+    requestAnimationFrame(() => document.getElementById('checkIn')?.focus())
+  }
+
+  const showReservation = (found) => {
+    setReservation(found)
+    setJustBooked(false)
+    setVickyOpen(false)
     goTo('manage')
   }
 
@@ -49,7 +64,7 @@ export default function App() {
 
       <main id="main">
         {view === 'booking' ? (
-          <Booking notify={notify} onReserved={handleReserved} />
+          <Booking notify={notify} onReserved={handleReserved} onAskVicky={() => setVickyOpen(true)} />
         ) : (
           <Manage
             notify={notify}
@@ -66,6 +81,14 @@ export default function App() {
         <p>Carrera 1 # 18-40, Taganga, Santa Marta. Recepción abierta las 24 horas.</p>
         <p className="footer-credit">Fotografías de Unsplash.</p>
       </footer>
+
+      <Vicky
+        open={vickyOpen}
+        onOpen={() => setVickyOpen(true)}
+        onClose={() => setVickyOpen(false)}
+        onBookManually={bookManually}
+        onShowReservation={showReservation}
+      />
 
       <div className="toast-region" role="status" aria-live="polite">
         {toast && (

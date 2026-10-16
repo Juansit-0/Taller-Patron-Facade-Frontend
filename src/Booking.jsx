@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Monogram } from './Vicky.jsx'
 import { api } from './api.js'
 import { formatDate, formatMoney, isHighSeason, roomImages, roomTypes, today } from './format.js'
 
@@ -18,7 +19,7 @@ function validateDates(checkIn, checkOut) {
   return ''
 }
 
-export default function Booking({ notify, onReserved }) {
+export default function Booking({ notify, onReserved, onAskVicky }) {
   const [search, setSearch] = useState({ checkIn: '', checkOut: '', type: '' })
   const [searched, setSearched] = useState(null)
   const [rooms, setRooms] = useState(null)
@@ -28,6 +29,7 @@ export default function Booking({ notify, onReserved }) {
   const [loading, setLoading] = useState('')
   const roomsRef = useRef(null)
   const stayRef = useRef(null)
+  const checkInRef = useRef(null)
 
   const updateSearch = (event) => setSearch({ ...search, [event.target.name]: event.target.value })
 
@@ -87,12 +89,30 @@ export default function Booking({ notify, onReserved }) {
             Hotel boutique frente al mar en Taganga, con piscina, terrazas de madera y desayuno al sol. Elige tus fechas y
             te mostramos qué habitaciones te esperan.
           </p>
+          <div className="booking-choice reveal" style={{ '--delay': '200ms' }} role="group" aria-label="Elige cómo reservar">
+            <button className="choice choice-self" type="button" onClick={() => checkInRef.current?.focus()}>
+              <span className="choice-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="1.5" /><path d="M4 10h16M9 3v4M15 3v4" /></svg>
+              </span>
+              <span className="choice-text">
+                <strong>Reservar yo mismo</strong>
+                <small>Elige fechas y habitación en el formulario</small>
+              </span>
+            </button>
+            <button className="choice choice-vicky" type="button" onClick={onAskVicky}>
+              <Monogram />
+              <span className="choice-text">
+                <strong>Que lo haga Vicky</strong>
+                <small>Escríbele y ella reserva por ti</small>
+              </span>
+            </button>
+          </div>
         </div>
 
-        <form className="search reveal" style={{ '--delay': '240ms' }} onSubmit={findRooms} noValidate>
+        <form className="search reveal" style={{ '--delay': '320ms' }} onSubmit={findRooms} noValidate>
           <div className="field">
             <label htmlFor="checkIn">Llegada</label>
-            <input id="checkIn" name="checkIn" type="date" min={today()} value={search.checkIn} onChange={updateSearch}
+            <input id="checkIn" ref={checkInRef} name="checkIn" type="date" min={today()} value={search.checkIn} onChange={updateSearch}
               aria-invalid={Boolean(dateError)} aria-describedby={dateError ? 'date-error' : undefined} required />
           </div>
           <div className="field">
