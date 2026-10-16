@@ -32,3 +32,16 @@ export const services = {
   BREAKFAST: { label: 'Desayuno', detail: '$15 por noche' },
   TRANSFER: { label: 'Traslado', detail: '$30 aeropuerto' },
 }
+
+export const firstName = (name = '') => name.trim().split(/\s+/)[0] || ''
+
+export const initials = (name = '') =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+
+export const reservationTotal = (reservation) =>
+  Number(reservation.roomTotal) + (reservation.services?.reduce((sum, service) => sum + Number(service.cost), 0) ?? 0)
