@@ -23,4 +23,7 @@ export const api = {
   checkIn: (id) => request(`/checkin/${withId(id)}`, { method: 'PUT' }),
   checkOut: (id) => request(`/checkout/${withId(id)}`, { method: 'PUT' }),
   reservation: (id) => request(`/reservation/${withId(id)}`),
+  assistantStatus: () => request('/assistant/status'),
+  assistantChat: (conversationId, message) =>
+    request('/assistant/chat', { method: 'POST', body: JSON.stringify({ conversationId, message }) }),
 }
