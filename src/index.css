@@ -73,7 +73,8 @@ p {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -947,7 +948,7 @@ tfoot th {
 .toast-region {
   position: fixed;
   right: var(--gutter);
-  bottom: 24px;
+  bottom: 96px;
   left: var(--gutter);
   z-index: 30;
   display: flex;
@@ -996,6 +997,639 @@ tfoot th {
   background: rgb(0 0 0 / 0.08);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.booking-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 660px;
+  margin-top: 36px;
+}
+
+.booking-choice :focus-visible {
+  outline-color: var(--paper);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 78px;
+  padding: 14px 20px 14px 14px;
+  border: 0;
+  border-radius: var(--radius);
+  text-align: left;
+  box-shadow: 0 24px 40px -28px rgb(10 24 18 / 0.7);
+  transition: background-color var(--duration) var(--ease-out), transform 120ms var(--ease-out);
+}
+
+.choice:active {
+  transform: scale(0.98);
+}
+
+.choice-text {
+  display: grid;
+  gap: 2px;
+}
+
+.choice-text strong {
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.choice-text small {
+  font-size: var(--step-small);
+  line-height: 1.35;
+}
+
+.choice-self {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.choice-self small {
+  color: var(--ink-soft);
+}
+
+.choice-self:hover {
+  background: var(--sand);
+}
+
+.choice-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--forest-soft);
+  color: var(--forest);
+  flex: none;
+}
+
+.choice-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.choice-vicky {
+  background: var(--gold);
+  color: var(--forest-deep);
+}
+
+.choice-vicky:hover {
+  background: #c9aa72;
+}
+
+.vicky-avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding-bottom: 3px;
+  border-radius: 50%;
+  background: var(--forest-deep);
+  box-shadow: inset 0 0 0 1px var(--gold), inset 0 0 0 4px var(--forest-deep), inset 0 0 0 5px rgb(184 151 92 / 0.45);
+  color: #e3cd9f;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.9rem;
+  line-height: 1;
+  flex: none;
+}
+
+.choice-vicky .vicky-avatar {
+  width: 46px;
+  height: 46px;
+  font-size: 1.7rem;
+}
+
+.vicky-avatar-small {
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+}
+
+.vicky-launcher {
+  position: fixed;
+  right: var(--gutter);
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 22px 7px 7px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--forest);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 18px 40px -16px rgb(20 42 32 / 0.6);
+  animation: toast-in 600ms 500ms var(--ease-out) both;
+  transition: background-color var(--duration) var(--ease-out), transform var(--duration) var(--ease-out);
+}
+
+.vicky-launcher[hidden] {
+  display: none;
+}
+
+.vicky-launcher:hover {
+  background: var(--forest-deep);
+  transform: translateY(-2px);
+}
+
+.vicky-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vicky-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(20 42 32 / 0.5);
+  animation: fade-in 320ms var(--ease-out) both;
+}
+
+.vicky-panel {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(480px, 100%);
+  height: 100%;
+  background: var(--cream);
+  box-shadow: -32px 0 64px -40px rgb(20 42 32 / 0.8);
+  animation: panel-in 520ms var(--ease-out) both;
+}
+
+.vicky-panel:focus {
+  outline: none;
+}
+
+.vicky-header {
+  padding: 20px 20px 0 24px;
+  background: var(--forest);
+  color: var(--paper);
+}
+
+.vicky-header :focus-visible {
+  outline-color: #e3cd9f;
+}
+
+.vicky-identity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.vicky-identity h2 {
+  font-size: 2.1rem;
+  font-weight: 600;
+}
+
+.vicky-identity p {
+  margin-top: 4px;
+  font-size: var(--step-small);
+  color: #dbe2d8;
+}
+
+.vicky-close {
+  display: grid;
+  place-items: center;
+  align-self: start;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  transition: background-color var(--duration) var(--ease-out);
+}
+
+.vicky-close:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.vicky-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.vicky-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 18px;
+  padding: 6px 0;
+  border-top: 1px solid rgb(251 248 242 / 0.16);
+  font-size: var(--step-small);
+}
+
+.vicky-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #dbe2d8;
+}
+
+.vicky-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b9ae98;
+}
+
+.vicky-dot-ready {
+  background: #9fd1ab;
+  box-shadow: 0 0 0 3px rgb(159 209 171 / 0.22);
+}
+
+.vicky-dot-checking {
+  background: var(--gold);
+  animation: breathe 1200ms ease-in-out infinite alternate;
+}
+
+.vicky-restart {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-right: -10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  font-weight: 600;
+  transition: background-color var(--duration) var(--ease-out);
+}
+
+.vicky-restart:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.vicky-restart:disabled {
+  opacity: 0.55;
+}
+
+.vicky-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+.vicky-entry {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.vicky-bubble {
+  max-width: 86%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-size: 1rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  animation: bubble-in 420ms var(--ease-out) both;
+}
+
+.from-vicky {
+  align-self: flex-start;
+  border-top-left-radius: 2px;
+  background: var(--paper);
+  box-shadow: 0 12px 24px -20px rgb(20 42 32 / 0.55);
+}
+
+.from-user {
+  align-self: flex-end;
+  border-top-right-radius: 2px;
+  background: var(--forest);
+  color: var(--paper);
+}
+
+.from-vicky.is-error {
+  display: flex;
+  gap: 10px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.is-error svg {
+  margin-top: 3px;
+}
+
+.vicky-welcome {
+  white-space: normal;
+}
+
+.vicky-greeting {
+  margin-bottom: 6px;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--forest);
+}
+
+.vicky-notice {
+  display: grid;
+  gap: 16px;
+  white-space: normal;
+}
+
+.vicky-notice .btn {
+  justify-self: start;
+}
+
+.vicky-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  animation: bubble-in 420ms 120ms var(--ease-out) both;
+}
+
+.vicky-chip {
+  padding: 9px 14px;
+  border: 1px solid #b9ae98;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--forest);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background-color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out);
+}
+
+.vicky-chip:hover:not(:disabled) {
+  border-color: var(--forest);
+  background: var(--paper);
+}
+
+.vicky-chip:disabled {
+  opacity: 0.55;
+}
+
+.vicky-typing {
+  display: flex;
+  gap: 6px;
+  padding: 18px 20px;
+}
+
+.vicky-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold-ink);
+  animation: typing 1000ms ease-in-out infinite;
+}
+
+.vicky-typing span:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.vicky-typing span:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.vicky-reservation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 22px 20px;
+  border-top: 2px solid var(--gold);
+  background: var(--paper);
+  box-shadow: 0 16px 32px -24px rgb(20 42 32 / 0.55);
+  animation: bubble-in 520ms var(--ease-out) both;
+}
+
+.vicky-reservation-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.vicky-reservation-head h3 {
+  font-size: 1.75rem;
+}
+
+.vicky-reservation-type {
+  margin-top: -10px;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.vicky-code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 12px;
+  background: var(--cream);
+}
+
+.vicky-code-label {
+  width: 100%;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.vicky-code-row code {
+  flex: 1 1 0;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--forest);
+  overflow-wrap: anywhere;
+}
+
+.vicky-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid #b9ae98;
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--forest);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: border-color var(--duration) var(--ease-out);
+}
+
+.vicky-copy:hover {
+  border-color: var(--forest);
+}
+
+.vicky-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+  margin: 0;
+}
+
+.vicky-facts dt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.vicky-facts dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.vicky-facts .vicky-total {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--sand);
+}
+
+.vicky-total dt {
+  font-size: 0.95rem;
+}
+
+.vicky-total dd {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--forest);
+}
+
+.vicky-reservation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vicky-reservation-actions .btn {
+  flex: 1 1 auto;
+  min-height: 46px;
+  padding: 10px 18px;
+}
+
+.vicky-reservation .section {
+  padding: 0;
+}
+
+.vicky-reservation .key-section {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.vicky-reservation .key-section h2,
+.vicky-reservation .invoice-actions h2 {
+  font-size: 1.5rem;
+}
+
+.vicky-reservation .invoice-actions {
+  margin-bottom: 12px;
+}
+
+.vicky-reservation .invoice {
+  padding: 20px 16px;
+}
+
+.vicky-reservation .invoice-brand {
+  font-size: 1.6rem;
+}
+
+.vicky-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px 10px;
+  padding: 14px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--sand);
+  background: var(--paper);
+}
+
+.vicky-composer textarea {
+  width: 100%;
+  min-height: 50px;
+  max-height: 160px;
+  padding: 13px 14px;
+  border: 1px solid #b9ae98;
+  border-radius: var(--radius);
+  background: #fff;
+  line-height: 1.45;
+  resize: none;
+  field-sizing: content;
+  transition: border-color var(--duration) var(--ease-out);
+}
+
+.vicky-composer textarea::placeholder {
+  color: #6b6558;
+}
+
+.vicky-composer textarea:hover:not(:disabled) {
+  border-color: var(--forest);
+}
+
+.vicky-composer textarea:focus-visible {
+  outline-offset: 0;
+  border-color: var(--forest);
+}
+
+.vicky-composer textarea:disabled {
+  background: var(--sand);
+  cursor: not-allowed;
+}
+
+.vicky-send {
+  width: 50px;
+  padding: 0;
+}
+
+.vicky-send svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.8;
+}
+
+.vicky-send[aria-busy='true'] svg {
+  display: none;
+}
+
+.vicky-hint {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
 .reveal {
   animation: rise 700ms var(--delay, 0ms) var(--ease-out) both;
 }
@@ -1030,6 +1664,53 @@ tfoot th {
   from {
     opacity: 0;
     transform: translateY(40px) rotate(-6deg) scale(0.92);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+}
+
+@keyframes panel-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes typing {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes breathe {
+  to {
+    opacity: 0.4;
   }
 }
 
@@ -1095,6 +1776,32 @@ tfoot th {
 
   .toast {
     max-width: none;
+  }
+
+  .booking-choice {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 28px;
+  }
+
+  .vicky-panel {
+    width: 100%;
+    animation-name: panel-up;
+  }
+
+  .vicky-header {
+    padding: 16px 12px 0 16px;
+  }
+
+  .vicky-messages {
+    padding: 22px 16px;
+  }
+
+  .vicky-bubble {
+    max-width: 92%;
+  }
+
+  .vicky-launcher {
+    right: 16px;
   }
 }
 
