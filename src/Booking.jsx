@@ -1,16 +1,8 @@
 import { useRef, useState } from 'react'
 import { Monogram } from './Vicky.jsx'
 import { api } from './api.js'
+import { Avatar } from './Account.jsx'
 import { formatDate, formatMoney, isHighSeason, roomImages, roomTypes, today } from './format.js'
-
-const emptyGuest = { guestName: '', guestEmail: '', guestPhone: '', documentId: '' }
-
-const guestFields = [
-  { name: 'guestName', label: 'Nombre completo', type: 'text', autoComplete: 'name' },
-  { name: 'guestEmail', label: 'Correo electrónico', type: 'email', autoComplete: 'email' },
-  { name: 'guestPhone', label: 'Teléfono', type: 'tel', autoComplete: 'tel' },
-  { name: 'documentId', label: 'Documento de identidad', type: 'text', autoComplete: 'off' },
-]
 
 function validateDates(checkIn, checkOut) {
   if (!checkIn || !checkOut) return 'Elige la fecha de llegada y la de salida.'
@@ -19,13 +11,12 @@ function validateDates(checkIn, checkOut) {
   return ''
 }
 
-export default function Booking({ notify, onReserved, onAskVicky }) {
+export default function Booking({ notify, guest, onReserved, onAskVicky, onRequireLogin, onEditProfile }) {
   const [search, setSearch] = useState({ checkIn: '', checkOut: '', type: '' })
   const [searched, setSearched] = useState(null)
   const [rooms, setRooms] = useState(null)
   const [dateError, setDateError] = useState('')
   const [selected, setSelected] = useState(null)
-  const [guest, setGuest] = useState(emptyGuest)
   const [loading, setLoading] = useState('')
   const roomsRef = useRef(null)
   const stayRef = useRef(null)
@@ -57,17 +48,13 @@ export default function Booking({ notify, onReserved, onAskVicky }) {
     requestAnimationFrame(() => stayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }
 
-  const reserve = async (event) => {
-    event.preventDefault()
+  const reserve = async () => {
+    if (!guest) return onRequireLogin()
     setLoading('reserve')
     try {
-      const created = await api.reserve({
-        ...guest,
-        roomNumber: selected.number,
-        checkIn: searched.checkIn,
-        checkOut: searched.checkOut,
-      })
-      setGuest(emptyGuest)
+      const created = await api.reserve({ roomNumber: selected.number, checkIn: searched.checkIn, checkOut: searched.checkOut })
+      setSelected(null)
+      setRooms(null)
       onReserved(created)
     } catch (error) {
       notify(error.message)
@@ -196,26 +183,26 @@ export default function Booking({ notify, onReserved, onAskVicky }) {
             </p>
           </div>
 
-          <form className="guest-form reveal" style={{ '--delay': '120ms' }} onSubmit={reserve}>
-            <h3>Datos del huésped</h3>
-            {guestFields.map((field) => (
-              <div className="field" key={field.name}>
-                <label htmlFor={field.name}>{field.label}</label>
-                <input
-                  id={field.name}
-                  name={field.name}
-                  type={field.type}
-                  autoComplete={field.autoComplete}
-                  value={guest[field.name]}
-                  onChange={(event) => setGuest({ ...guest, [field.name]: event.target.value })}
-                  required
-                />
+          <div className="guest-form reveal" style={{ '--delay': '120ms' }}>
+            <h3>{guest ? 'Todo listo para confirmar' : 'Un paso antes de reservar'}</h3>
+            {guest ? (
+              <div className="booker">
+                <Avatar name={guest.fullName} />
+                <p>
+                  Reservando como <strong>{guest.fullName}</strong>
+                  <span>{guest.email}</span>
+                </p>
+                <button className="text-link" type="button" onClick={onEditProfile}>Editar perfil</button>
               </div>
-            ))}
-            <button className="btn btn-primary" type="submit" aria-busy={loading === 'reserve'} disabled={loading === 'reserve'}>
-              {loading === 'reserve' ? 'Confirmando' : 'Confirmar reserva'}
+            ) : (
+              <p className="booker-note">
+                Inicia sesión o crea tu cuenta. Usamos tus datos guardados, así que la reserva queda lista con un clic.
+              </p>
+            )}
+            <button className="btn btn-primary" type="button" aria-busy={loading === 'reserve'} disabled={loading === 'reserve'} onClick={reserve}>
+              {guest ? (loading === 'reserve' ? 'Confirmando' : 'Confirmar reserva') : 'Inicia sesión para reservar'}
             </button>
-          </form>
+          </div>
         </section>
       )}
     </>

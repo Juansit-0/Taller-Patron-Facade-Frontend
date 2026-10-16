@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from './api.js'
-import { formatDate, formatMoney, roomTypes, statusLabels } from './format.js'
+import { firstName, formatDate, formatMoney, reservationTotal, roomTypes, statusLabels } from './format.js'
 import KeyCard from './KeyCard.jsx'
 import Invoice from './Invoice.jsx'
 
@@ -38,6 +38,21 @@ function storeId(id) {
   }
 }
 
+export function keepFocusInside(event, container) {
+  if (event.key !== 'Tab') return
+  const items = container.querySelectorAll(focusable)
+  const first = items[0]
+  const last = items[items.length - 1]
+  const current = document.activeElement
+  if (event.shiftKey && (current === first || current === container)) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && current === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
 export function Monogram({ small = false }) {
   return (
     <span className={small ? 'vicky-avatar vicky-avatar-small' : 'vicky-avatar'} aria-hidden="true">
@@ -49,8 +64,6 @@ export function Monogram({ small = false }) {
 function ReservationCard({ reservation, onOpen }) {
   const [copyState, setCopyState] = useState('')
   const [showInvoice, setShowInvoice] = useState(false)
-  const servicesTotal = reservation.services?.reduce((sum, service) => sum + Number(service.cost), 0) ?? 0
-
   const copyId = async () => {
     try {
       await navigator.clipboard.writeText(reservation.id)
@@ -89,13 +102,13 @@ function ReservationCard({ reservation, onOpen }) {
         <div><dt>Temporada</dt><dd>{reservation.season === 'HIGH' ? 'Alta' : 'Baja'}</dd></div>
         <div className="vicky-total">
           <dt>Total acumulado</dt>
-          <dd>{formatMoney(Number(reservation.roomTotal) + servicesTotal)}</dd>
+          <dd>{formatMoney(reservationTotal(reservation))}</dd>
         </div>
       </dl>
 
       <div className="vicky-reservation-actions">
         <button className="btn btn-primary" type="button" onClick={() => onOpen(reservation)}>
-          Abrir en Mi reserva
+          Abrir en Mis reservas
         </button>
         {reservation.invoice && (
           <button className="btn btn-gold" type="button" aria-expanded={showInvoice} onClick={() => setShowInvoice(!showInvoice)}>
@@ -112,7 +125,7 @@ function ReservationCard({ reservation, onOpen }) {
   )
 }
 
-export default function Vicky({ open, onOpen, onClose, onBookManually, onShowReservation }) {
+export default function Vicky({ open, guest, onOpen, onClose, onLogin, onBookManually, onShowReservation }) {
   const [status, setStatus] = useState('checking')
   const [conversationId, setConversationId] = useState(readStoredId)
   const [messages, setMessages] = useState([])
@@ -122,6 +135,16 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
   const listRef = useRef(null)
   const inputRef = useRef(null)
   const returnRef = useRef(null)
+  const guestRef = useRef(guest?.id)
+
+  useEffect(() => {
+    if (guestRef.current === guest?.id) return
+    guestRef.current = guest?.id
+    setConversationId(null)
+    storeId(null)
+    setMessages([])
+    setDraft('')
+  }, [guest?.id])
 
   useEffect(() => {
     if (!open) {
@@ -138,7 +161,7 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
       .then((result) => {
         if (!active) return
         setStatus(result?.enabled ? 'ready' : 'off')
-        if (result?.enabled) requestAnimationFrame(() => inputRef.current?.focus())
+        if (result?.enabled && guestRef.current) requestAnimationFrame(() => inputRef.current?.focus())
       })
       .catch(() => active && setStatus('off'))
     return () => {
@@ -159,7 +182,7 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
 
   const send = async (text) => {
     const message = text.trim()
-    if (!message || waiting || status !== 'ready') return
+    if (!message || waiting || !canChat) return
     setMessages((list) => [...list, { role: 'user', text: message }])
     setDraft('')
     setWaiting(true)
@@ -189,18 +212,7 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
       onClose()
       return
     }
-    if (event.key !== 'Tab') return
-    const items = panelRef.current.querySelectorAll(focusable)
-    const first = items[0]
-    const last = items[items.length - 1]
-    const current = document.activeElement
-    if (event.shiftKey && (current === first || current === panelRef.current)) {
-      event.preventDefault()
-      last.focus()
-    } else if (!event.shiftKey && current === last) {
-      event.preventDefault()
-      first.focus()
-    }
+    keepFocusInside(event, panelRef.current)
   }
 
   const handleInputKey = (event) => {
@@ -213,6 +225,7 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
   const lastMessage = messages.at(-1)
   const announcement = waiting ? 'Vicky está escribiendo' : lastMessage && lastMessage.role !== 'user' ? lastMessage.text : ''
   const unavailable = status === 'off'
+  const canChat = status === 'ready' && Boolean(guest)
 
   return (
     <>
@@ -259,7 +272,7 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
 
             <div className="vicky-messages" ref={listRef}>
               <div className="vicky-bubble from-vicky vicky-welcome">
-                <p className="vicky-greeting">Hola, soy Vicky.</p>
+                <p className="vicky-greeting">{guest ? `Hola, ${firstName(guest.fullName)}, soy Vicky.` : 'Hola, soy Vicky.'}</p>
                 <p>
                   Puedo consultar la disponibilidad, hacer tu reserva, agregar spa, desayuno o traslado, y ayudarte con
                   el check-in y el check-out. Cuéntame qué necesitas.
@@ -275,11 +288,20 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
                 </div>
               )}
 
-              {!unavailable && messages.length === 0 && (
+              {!unavailable && !guest && (
+                <div className="vicky-bubble from-vicky vicky-notice" role="status">
+                  <p>Inicia sesión para que Vicky reserve por ti. Así ya sabe tu nombre y tus datos, y no tienes que repetirlos.</p>
+                  <button className="btn btn-primary" type="button" onClick={onLogin}>
+                    Iniciar sesión
+                  </button>
+                </div>
+              )}
+
+              {!unavailable && guest && messages.length === 0 && (
                 <ul className="vicky-suggestions" aria-label="Sugerencias">
                   {suggestions.map((suggestion) => (
                     <li key={suggestion}>
-                      <button className="vicky-chip" type="button" disabled={status !== 'ready'} onClick={() => send(suggestion)}>
+                      <button className="vicky-chip" type="button" disabled={!canChat} onClick={() => send(suggestion)}>
                         {suggestion}
                       </button>
                     </li>
@@ -325,17 +347,17 @@ export default function Vicky({ open, onOpen, onClose, onBookManually, onShowRes
                 ref={inputRef}
                 rows={1}
                 value={draft}
-                placeholder={unavailable ? 'Vicky no está disponible' : 'Escribe tu mensaje'}
+                placeholder={unavailable ? 'Vicky no está disponible' : guest ? 'Escribe tu mensaje' : 'Inicia sesión para escribirle'}
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleInputKey}
-                disabled={status !== 'ready'}
+                disabled={!canChat}
                 readOnly={waiting}
                 aria-describedby="vicky-hint"
               />
               <button
                 className="btn btn-primary vicky-send"
                 type="submit"
-                disabled={waiting || status !== 'ready' || !draft.trim()}
+                disabled={waiting || !canChat || !draft.trim()}
                 aria-busy={waiting}
                 aria-label={waiting ? 'Vicky está respondiendo' : 'Enviar mensaje'}
               >
